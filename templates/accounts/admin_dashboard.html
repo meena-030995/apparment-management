@@ -1,0 +1,592 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+    .admin-main {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .hero-panel {
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 26%),
+            radial-gradient(circle at left center, rgba(87, 193, 255, 0.16), transparent 28%),
+            radial-gradient(circle at 20% 85%, rgba(213, 123, 66, 0.24), transparent 26%),
+            linear-gradient(135deg, #101a2f 0%, #15455a 52%, #d57b42 100%);
+        border-radius: 2rem;
+        padding: 1.4rem;
+        box-shadow: 0 28px 65px rgba(21, 33, 52, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #fffaf3;
+    }
+
+    .hero-panel::after {
+        content: "";
+        position: absolute;
+        right: -55px;
+        bottom: -55px;
+        width: 210px;
+        height: 210px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-title {
+        font-size: clamp(1.7rem, 2.2vw, 2.35rem);
+        font-weight: 800;
+        color: #fffaf3;
+        margin-bottom: 0.25rem;
+    }
+
+    .hero-copy {
+        color: rgba(255, 250, 243, 0.8);
+        max-width: 50rem;
+        margin-bottom: 0;
+    }
+
+    .hero-stat {
+        position: relative;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 1.2rem;
+        padding: 0.9rem;
+        height: 100%;
+        backdrop-filter: blur(8px);
+    }
+
+    .hero-stat .label,
+    .metric-card .label {
+        color: #7b8799;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .hero-stat .label {
+        color: rgba(255, 250, 243, 0.64);
+    }
+
+    .hero-stat .value,
+    .metric-card .value,
+    .signal-value {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-top: 0.15rem;
+    }
+
+    .hero-stat .value {
+        color: #fffaf3;
+    }
+
+    .metric-card {
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 243, 235, 0.92));
+        border-radius: 1.5rem;
+        padding: 1rem;
+        border: 1px solid rgba(34, 53, 75, 0.08);
+        box-shadow: 0 18px 38px rgba(21, 33, 52, 0.08);
+        height: 100%;
+    }
+
+    .metric-card .trend {
+        color: #155e63;
+        font-size: 0.88rem;
+        margin-top: 0.35rem;
+    }
+
+    .dashboard-panel {
+        background: rgba(255, 251, 245, 0.78);
+        border-radius: 1.7rem;
+        border: 1px solid rgba(34, 53, 75, 0.1);
+        box-shadow: 0 18px 40px rgba(21, 33, 52, 0.08);
+        padding: 1.1rem;
+        height: 100%;
+    }
+
+    .panel-title {
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 0.2rem;
+    }
+
+    .panel-subtitle {
+        color: #617189;
+        margin-bottom: 0.6rem;
+    }
+
+    .signal-panel {
+        height: 100%;
+        padding: 1.05rem;
+        border-radius: 1.4rem;
+        background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(247,243,235,0.88));
+        border: 1px solid rgba(34, 53, 75, 0.08);
+        box-shadow: 0 18px 36px rgba(21, 33, 52, 0.07);
+    }
+
+    .signal-label {
+        color: #617189;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+
+    .signal-note {
+        margin-top: 0.45rem;
+        color: #155e63;
+        font-size: 0.92rem;
+    }
+
+    .action-tile {
+        display: block;
+        background: linear-gradient(135deg, #102039 0%, #155e63 100%);
+        color: #fff;
+        text-decoration: none;
+        padding: 1rem;
+        border-radius: 1.2rem;
+        min-height: 100%;
+        box-shadow: 0 16px 34px rgba(21, 33, 52, 0.16);
+    }
+
+    .action-tile.secondary {
+        background: linear-gradient(135deg, #21442d 0%, #0f766e 100%);
+    }
+
+    .action-tile.warm {
+        background: linear-gradient(135deg, #7a3517 0%, #d57b42 100%);
+    }
+
+    .action-tile.light {
+        background: linear-gradient(135deg, #274690 0%, #4c7fd9 100%);
+    }
+
+    .activity-list {
+        display: grid;
+        gap: 0.55rem;
+    }
+
+    .activity-item {
+        border: 1px solid rgba(34, 53, 75, 0.08);
+        border-radius: 1.1rem;
+        padding: 0.8rem 0.9rem;
+        background: rgba(255, 255, 255, 0.76);
+    }
+
+    .activity-meta {
+        color: #617189;
+        font-size: 0.9rem;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.2rem 0.65rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    .status-open,
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-assigned,
+    .status-in_progress {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-closed,
+    .status-paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .empty-state {
+        background: rgba(255, 255, 255, 0.64);
+        border: 1px dashed rgba(34, 53, 75, 0.18);
+        border-radius: 1rem;
+        padding: 0.8rem;
+        color: #617189;
+    }
+
+    #paymentTrendChart {
+        height: 220px !important;
+    }
+
+    #ticketCategoryChart {
+        height: 220px !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <section class="admin-main">
+        <div class="hero-panel">
+            <div class="row g-2 align-items-end">
+                <div class="col-lg-7">
+                    <div class="eyebrow mb-2" style="color: rgba(255, 250, 243, 0.72);">Operations Overview</div>
+                    <h1 class="hero-title">Run the entire apartment community from one screen.</h1>
+                    <p class="hero-copy">
+                        Track resident growth, complaints, visitor traffic, notices, and collections in a single workflow built for day-to-day operations.
+                    </p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="hero-stat">
+                                <div class="label">Residents</div>
+                                <div class="value">{{ stats.total_residents }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="hero-stat">
+                                <div class="label">Collections</div>
+                                <div class="value">Rs. {{ stats.payments_collected|floatformat:0 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-sm-6 col-xl-3">
+                <div class="metric-card">
+                    <div class="label">Open Tickets</div>
+                    <div class="value">{{ stats.open_tickets }}</div>
+                    <div class="trend">Needs active follow-up from staff.</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="metric-card">
+                    <div class="label">Pending Payments</div>
+                    <div class="value">{{ stats.pending_payments }}</div>
+                    <div class="trend">Outstanding dues waiting for collection.</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="metric-card">
+                    <div class="label">Occupied Flats</div>
+                    <div class="value">{{ stats.occupied_flats }}</div>
+                    <div class="trend">Tracked apartment units in the system.</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="metric-card">
+                    <div class="label">Active Notices</div>
+                    <div class="value">{{ stats.active_notices }}</div>
+                    <div class="trend">Announcements currently visible to residents.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="signal-panel">
+                    <div class="signal-label">Gateflow</div>
+                    <div class="signal-value">{{ stats.visitors_today }}</div>
+                    <div class="signal-note">Visitors checked in today across the property.</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="signal-panel">
+                    <div class="signal-label">Revenue Pulse</div>
+                    <div class="signal-value">Rs. {{ stats.payments_collected|floatformat:0 }}</div>
+                    <div class="signal-note">Collections already recorded in the current reporting window.</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="signal-panel">
+                    <div class="signal-label">Community Load</div>
+                    <div class="signal-value">{{ recent_activity|length }}</div>
+                    <div class="signal-note">Recent tracked actions affecting daily operations.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-2">
+            <div class="col-lg-8">
+                <div class="dashboard-panel">
+                    <h3 class="panel-title">Payment Trend</h3>
+                    <p class="panel-subtitle">Paid collections across recent months.</p>
+                    <canvas id="paymentTrendChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="dashboard-panel">
+                    <h3 class="panel-title">Ticket Categories</h3>
+                    <p class="panel-subtitle">Where most service demand is coming from.</p>
+                    <canvas id="ticketCategoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-panel">
+            <h3 class="panel-title">Quick Actions</h3>
+            <p class="panel-subtitle">Jump into the most common admin workflows.</p>
+            <div class="row g-2">
+                <div class="col-md-6 col-xl-3">
+                    <a class="action-tile" href="{% url 'all_tickets' %}">
+                        <strong>Review Tickets</strong>
+                        <div class="mt-2 opacity-75">Handle resident complaints and update statuses.</div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <a class="action-tile secondary" href="{% url 'create_notice' %}">
+                        <strong>Publish Notice</strong>
+                        <div class="mt-2 opacity-75">Send an update to the whole apartment community.</div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <a class="action-tile warm" href="{% url 'visitor_list' %}">
+                        <strong>Monitor Visitors</strong>
+                        <div class="mt-2 opacity-75">See the latest gate activity and unresolved entries.</div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <a class="action-tile light" href="{% url 'payment_records' %}">
+                        <strong>Check Payments</strong>
+                        <div class="mt-2 opacity-75">Track collections, pending dues, and resident payment history.</div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-3">
+                    <a class="action-tile" href="{% url 'activity_logs' %}">
+                        <strong>Audit Activity</strong>
+                        <div class="mt-2 opacity-75">Review logins, payments, notices, visitors, and ticket actions.</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-2">
+            <div class="col-xl-4">
+                <div class="dashboard-panel h-100">
+                    <h3 class="panel-title">Recent Tickets</h3>
+                    <p class="panel-subtitle">Latest complaints entering the system.</p>
+                    {% if recent_tickets %}
+                        <div class="activity-list">
+                            {% for ticket in recent_tickets %}
+                                <div class="activity-item">
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <div>
+                                            <strong>{{ ticket.title }}</strong>
+                                            <div class="activity-meta">{{ ticket.resident.username }} - {{ ticket.get_category_display }}</div>
+                                        </div>
+                                        <span class="status-pill status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">No tickets have been created yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="dashboard-panel h-100">
+                    <h3 class="panel-title">Recent Visitors</h3>
+                    <p class="panel-subtitle">Most recent visitor entries at the gate.</p>
+                    {% if recent_visitors %}
+                        <div class="activity-list">
+                            {% for visitor in recent_visitors %}
+                                <div class="activity-item">
+                                    <strong>{{ visitor.name }}</strong>
+                                    <div class="activity-meta">
+                                        Flat {{ visitor.flat_number }} - {{ visitor.entry_time|date:"d M Y, h:i A" }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">No visitor entries have been recorded yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="dashboard-panel h-100">
+                    <h3 class="panel-title">Recent Payments</h3>
+                    <p class="panel-subtitle">Newest dues and payment updates.</p>
+                    {% if recent_payments %}
+                        <div class="activity-list">
+                            {% for payment in recent_payments %}
+                                <div class="activity-item">
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <div>
+                                            <strong>{{ payment.resident.username }}</strong>
+                                            <div class="activity-meta">{{ payment.month }} {{ payment.year }} - Rs. {{ payment.amount }}</div>
+                                        </div>
+                                        <span class="status-pill status-{{ payment.status }}">{{ payment.get_status_display }}</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">No payment records are available yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-panel">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h3 class="panel-title">Recent Activity</h3>
+                    <p class="panel-subtitle mb-0">Latest tracked actions across the platform.</p>
+                </div>
+                <a href="{% url 'activity_logs' %}" class="btn btn-outline-secondary btn-sm">View Full Log</a>
+            </div>
+            {% if recent_activity %}
+                <div class="activity-list">
+                    {% for log in recent_activity %}
+                        <div class="activity-item">
+                            <div class="d-flex justify-content-between gap-3 flex-wrap">
+                                <div>
+                                    <strong>{{ log.user.username }}</strong>
+                                    <div class="activity-meta">{{ log.get_action_display }} - {{ log.description }}</div>
+                                </div>
+                                <div class="activity-meta">{{ log.created_at|date:"d M Y, h:i A" }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">No system activity has been recorded yet.</div>
+            {% endif %}
+        </div>
+
+        <div class="dashboard-panel">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h3 class="panel-title">Resident Household Details</h3>
+                    <p class="panel-subtitle mb-0">Resident-submitted family details mapped to each flat.</p>
+                </div>
+            </div>
+
+            {% if resident_households %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Resident</th>
+                                <th>Flat</th>
+                                <th>Household Type</th>
+                                <th>Family Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for resident in resident_households %}
+                                <tr>
+                                    <td>{{ resident.username }}</td>
+                                    <td>
+                                        {% if resident.flat %}
+                                            {{ resident.flat.number }} / {{ resident.flat.block }}
+                                        {% else %}
+                                            Not assigned
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ resident.get_household_type_display }}</td>
+                                    <td>
+                                        {% if resident.family_members.all %}
+                                            {% for member in resident.family_members.all %}
+                                                <div>
+                                                    <strong>{{ member.name }}</strong>,
+                                                    {{ member.get_gender_display }},
+                                                    {{ member.relationship }},
+                                                    {{ member.date_of_birth|date:"d M Y" }},
+                                                    {{ member.age }} years
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="text-muted">No family details submitted.</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">No resident household records have been submitted yet.</div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    const paymentLabels = {{ payment_chart_labels|safe }};
+    const paymentValues = {{ payment_chart_values|safe }};
+    const ticketLabels = {{ ticket_chart_labels|safe }};
+    const ticketValues = {{ ticket_chart_values|safe }};
+
+    const sharedGridColor = "rgba(148, 163, 184, 0.2)";
+
+    new Chart(document.getElementById("paymentTrendChart"), {
+        type: "line",
+        data: {
+            labels: paymentLabels,
+            datasets: [{
+                label: "Collections",
+                data: paymentValues,
+                borderColor: "#0f766e",
+                backgroundColor: "rgba(15, 118, 110, 0.12)",
+                fill: true,
+                tension: 0.35,
+                borderWidth: 3,
+                pointBackgroundColor: "#0f766e",
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: sharedGridColor }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById("ticketCategoryChart"), {
+        type: "doughnut",
+        data: {
+            labels: ticketLabels,
+            datasets: [{
+                data: ticketValues,
+                backgroundColor: ["#0f766e", "#2563eb", "#ea580c", "#7c3aed", "#f59e0b"],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: "bottom"
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

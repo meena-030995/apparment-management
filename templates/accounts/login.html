@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block extra_head %}
+<style>
+    .auth-stage {
+        position: relative;
+        min-height: calc(100vh - 6rem);
+        display: grid;
+        align-items: center;
+    }
+
+    .auth-stage::before,
+    .auth-stage::after {
+        content: "";
+        position: absolute;
+        inset: auto;
+        border-radius: 999px;
+        filter: blur(10px);
+        pointer-events: none;
+    }
+
+    .auth-stage::before {
+        width: 280px;
+        height: 280px;
+        top: 2rem;
+        right: 4%;
+        background: rgba(13, 124, 116, 0.13);
+    }
+
+    .auth-stage::after {
+        width: 320px;
+        height: 320px;
+        left: 2%;
+        bottom: 1rem;
+        background: rgba(213, 123, 66, 0.12);
+    }
+
+    .auth-shell {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(360px, 460px);
+        gap: 1.25rem;
+        align-items: stretch;
+    }
+
+    .auth-story {
+        position: relative;
+        overflow: hidden;
+        border-radius: 34px;
+        min-height: 680px;
+        padding: 2rem;
+        background:
+            linear-gradient(145deg, rgba(8, 20, 37, 0.96), rgba(18, 71, 84, 0.92) 54%, rgba(184, 110, 57, 0.88) 100%);
+        box-shadow: 0 28px 70px rgba(19, 32, 51, 0.22);
+        color: #f5f7fb;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+    }
+
+    .auth-story::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.13), transparent 22%),
+            radial-gradient(circle at 85% 14%, rgba(124, 223, 214, 0.18), transparent 18%),
+            radial-gradient(circle at 50% 85%, rgba(255, 215, 173, 0.15), transparent 24%);
+        pointer-events: none;
+    }
+
+    .auth-brand,
+    .auth-story-main,
+    .auth-story-foot {
+        position: relative;
+        z-index: 1;
+    }
+
+    .auth-brand {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        width: fit-content;
+        padding: 1rem 1.15rem;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(14px);
+    }
+
+    .auth-brand-kicker {
+        font-size: 0.76rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(137, 233, 224, 0.88);
+        font-weight: 800;
+    }
+
+    .auth-brand-name {
+        font-size: 2rem;
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+    }
+
+    .auth-brand-copy {
+        font-size: 0.88rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: rgba(233, 239, 247, 0.78);
+        font-weight: 700;
+    }
+
+    .auth-story-main {
+        display: grid;
+        align-content: center;
+        gap: 1.4rem;
+        max-width: 42rem;
+        padding: 1.4rem 0 1rem;
+    }
+
+    .auth-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        width: fit-content;
+        padding: 0.55rem 0.95rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: rgba(245, 247, 251, 0.86);
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .auth-story-title {
+        margin: 0;
+        font-size: clamp(2.8rem, 5vw, 5rem);
+        line-height: 0.94;
+        letter-spacing: -0.06em;
+        font-weight: 800;
+        max-width: 10ch;
+    }
+
+    .auth-story-copy {
+        margin: 0;
+        color: rgba(236, 241, 247, 0.82);
+        font-size: 1.05rem;
+        line-height: 1.85;
+        max-width: 36rem;
+    }
+
+    .auth-story-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .auth-signal {
+        padding: 1rem;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+    }
+
+    .auth-signal-label {
+        display: block;
+        color: rgba(180, 243, 237, 0.8);
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .auth-signal-value {
+        display: block;
+        margin-top: 0.4rem;
+        font-size: 1.18rem;
+        font-weight: 800;
+        color: #ffffff;
+    }
+
+    .auth-story-foot {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .auth-foot-card {
+        padding: 1rem 1.05rem;
+        border-radius: 22px;
+        background: rgba(9, 18, 30, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .auth-foot-card strong {
+        display: block;
+        margin-bottom: 0.28rem;
+        color: #ffffff;
+    }
+
+    .auth-foot-card span {
+        color: rgba(236, 241, 247, 0.72);
+        font-size: 0.92rem;
+        line-height: 1.55;
+    }
+
+    .auth-panel {
+        display: flex;
+        align-items: center;
+    }
+
+    .auth-card {
+        width: 100%;
+        padding: 0;
+        border-radius: 34px;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 251, 255, 0.92));
+        box-shadow: 0 24px 60px rgba(21, 33, 52, 0.14);
+        overflow: hidden;
+    }
+
+    .auth-card-top {
+        padding: 1.35rem 1.45rem 0;
+    }
+
+    .auth-status-bar {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.7rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .auth-status {
+        padding: 0.95rem 0.9rem;
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(244, 248, 255, 0.96), rgba(235, 242, 249, 0.95));
+        border: 1px solid rgba(34, 53, 75, 0.08);
+    }
+
+    .auth-status span {
+        display: block;
+    }
+
+    .auth-status-label {
+        color: #617189;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .auth-status-value {
+        margin-top: 0.3rem;
+        color: #102039;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .auth-form-wrap {
+        padding: 0 1.45rem 1.45rem;
+    }
+
+    .auth-eyebrow {
+        margin-bottom: 0.55rem;
+        color: #0d7c74;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 0.84rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+    }
+
+    .auth-title {
+        margin: 0;
+        color: #101828;
+        font-size: clamp(2.35rem, 4vw, 3rem);
+        line-height: 0.96;
+        letter-spacing: -0.05em;
+        font-weight: 800;
+    }
+
+    .auth-subtitle {
+        margin: 0.8rem 0 0;
+        color: #617189;
+        font-size: 1rem;
+        line-height: 1.75;
+        max-width: 28rem;
+    }
+
+    .auth-form {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1.7rem;
+    }
+
+    .auth-label {
+        display: block;
+        margin-bottom: 0.45rem;
+        color: #31415f;
+        font-size: 0.94rem;
+        font-weight: 800;
+    }
+
+    .auth-input {
+        min-height: 3.6rem;
+        border-radius: 18px !important;
+        background: linear-gradient(180deg, rgba(252, 253, 255, 0.98), rgba(241, 246, 252, 0.95)) !important;
+    }
+
+    .auth-submit {
+        min-height: 3.55rem;
+        margin-top: 0.35rem;
+        font-size: 1.02rem;
+    }
+
+    .auth-note {
+        margin-top: 1.2rem;
+        padding: 1rem 1.05rem;
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(15, 118, 110, 0.08), rgba(213, 123, 66, 0.08));
+        color: #51617a;
+        line-height: 1.7;
+    }
+
+    .auth-links {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 1.2rem;
+        color: #617189;
+    }
+
+    .auth-links a {
+        color: #144b61;
+        text-decoration: none;
+        font-weight: 800;
+    }
+
+    @media (max-width: 1100px) {
+        .auth-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .auth-story {
+            min-height: 560px;
+        }
+    }
+
+    @media (max-width: 720px) {
+        .auth-stage {
+            min-height: auto;
+        }
+
+        .auth-story {
+            min-height: auto;
+            padding: 1.35rem;
+        }
+
+        .auth-story-grid,
+        .auth-story-foot,
+        .auth-status-bar {
+            grid-template-columns: 1fr;
+        }
+
+        .auth-card-top,
+        .auth-form-wrap {
+            padding-left: 1.05rem;
+            padding-right: 1.05rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="auth-stage">
+    <div class="auth-shell">
+        <div class="auth-story">
+            <div class="auth-brand">
+                <span class="auth-brand-kicker">Living Console</span>
+                <span class="auth-brand-name">AMS Apartment</span>
+                <span class="auth-brand-copy">Resident Platform</span>
+            </div>
+
+            <div class="auth-story-main">
+                <span class="auth-chip">Everyday Apartment Workflows</span>
+                <h1 class="auth-story-title">One login for the whole community rhythm.</h1>
+                <p class="auth-story-copy">
+                    Move from complaints to collections, visitor records to notices, and resident requests to daily action without the dashboard feeling heavy.
+                </p>
+
+                <div class="auth-story-grid">
+                    <div class="auth-signal">
+                        <span class="auth-signal-label">Residents</span>
+                        <span class="auth-signal-value">Services</span>
+                    </div>
+                    <div class="auth-signal">
+                        <span class="auth-signal-label">Staff</span>
+                        <span class="auth-signal-value">Operations</span>
+                    </div>
+                    <div class="auth-signal">
+                        <span class="auth-signal-label">Admin</span>
+                        <span class="auth-signal-value">Oversight</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-story-foot">
+                <div class="auth-foot-card">
+                    <strong>Complaints</strong>
+                    <span>Track resident issues with cleaner staff handoff.</span>
+                </div>
+                <div class="auth-foot-card">
+                    <strong>Visitors</strong>
+                    <span>Keep gate activity visible without extra noise.</span>
+                </div>
+                <div class="auth-foot-card">
+                    <strong>Dues</strong>
+                    <span>Review payments and pending collections from one place.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-panel">
+            <div class="card page-card auth-card">
+                <div class="auth-card-top">
+                    <div class="auth-status-bar">
+                        <div class="auth-status">
+                            <span class="auth-status-label">Access</span>
+                            <span class="auth-status-value">Secure</span>
+                        </div>
+                        <div class="auth-status">
+                            <span class="auth-status-label">Users</span>
+                            <span class="auth-status-value">All Roles</span>
+                        </div>
+                        <div class="auth-status">
+                            <span class="auth-status-label">Flow</span>
+                            <span class="auth-status-value">Fast Sign-in</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="auth-form-wrap">
+                    <div class="auth-eyebrow">Welcome Back</div>
+                    <h2 class="auth-title">Login to your workspace.</h2>
+                    <p class="auth-subtitle">Access your dashboard, continue pending work, and move through resident operations with less friction.</p>
+
+                    <form method="POST" class="auth-form">
+                        {% csrf_token %}
+                        <div>
+                            <label class="auth-label" for="id_username">Username</label>
+                            <input class="form-control auth-input" id="id_username" name="username" placeholder="Enter your username" autocomplete="username">
+                        </div>
+                        <div>
+                            <label class="auth-label" for="id_password">Password</label>
+                            <div class="password-toggle-wrap">
+                                <input class="form-control password-toggle-input auth-input" id="id_password" type="password" name="password" placeholder="Enter your password" autocomplete="current-password">
+                                <button class="password-toggle-btn" type="button" data-password-toggle data-target="id_password" aria-label="Show password">Show</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-success auth-submit" type="submit">Login</button>
+                    </form>
+
+                    <div class="auth-note">
+                        Residents, security, staff, and admin can all sign in here and continue in the role-specific dashboard designed for their daily work.
+                    </div>
+
+                    <div class="auth-links">
+                        <span>New here? <a href="{% url 'register' %}">Create an account</a></span>
+                        <a href="{% url 'home' %}">Back to home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance Dues{% endblock %}
+
+{% block content %}
+<div class="card page-card">
+    <div class="card-body p-4">
+        <div class="page-hero">
+            <div>
+                <div class="eyebrow">Resident Accounts</div>
+                <h2 class="section-title">Maintenance Dues</h2>
+                <p class="section-subtitle">Review current dues and complete pending maintenance payments.</p>
+            </div>
+        </div>
+
+        {% if payments %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>Due Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.get_payment_type_display }}</td>
+                        <td>{{ payment.month }}</td>
+                        <td>{{ payment.year }}</td>
+                        <td>{{ payment.due_date|default:"-" }}</td>
+                        <td>{{ payment.amount }}</td>
+                        <td><span class="badge text-bg-secondary">{{ payment.get_status_display }}</span></td>
+                        <td>
+                            {% if payment.status == "pending" %}
+                            <a href="{% url 'create_payment' payment.id %}" class="btn btn-success btn-sm">Pay Online</a>
+                            <form method="POST" action="/payments/pay/{{payment.id}}/" class="d-inline ms-1">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Mark Manual</button>
+                            </form>
+                            {% else %}
+                            <span class="text-success fw-semibold">Paid</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">No payment dues available.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

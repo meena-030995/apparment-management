@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Security Dashboard{% endblock %}
+
+{% block content %}
+<div class="card page-card">
+    <div class="card-body p-4 p-md-5">
+        <div class="feature-banner mb-4">
+            <div class="eyebrow">Security Desk</div>
+            <h2>Visitor movement, fast and organized.</h2>
+            <p>Handle gate operations smoothly with quick access to arrivals, exits, and notices.</p>
+        </div>
+
+        <div class="action-grid">
+            <div>
+                <a class="text-decoration-none" href="{% url 'add_visitor' %}">
+                    <div class="quick-link-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Add Visitor Entry</h5>
+                            <p class="card-text text-muted mb-0">Register new arrivals at the gate.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div>
+                <a class="text-decoration-none" href="{% url 'visitor_list' %}">
+                    <div class="quick-link-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Visitor Logs</h5>
+                            <p class="card-text text-muted mb-0">Review entries and mark exits when visitors leave.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div>
+                <a class="text-decoration-none" href="{% url 'notice_list' %}">
+                    <div class="quick-link-card">
+                        <div class="card-body">
+                            <h5 class="card-title">View Notices</h5>
+                            <p class="card-text text-muted mb-0">See announcements relevant for gate operations.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

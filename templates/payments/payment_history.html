@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Payment History{% endblock %}
+
+{% block content %}
+<div class="card page-card">
+    <div class="card-body p-4">
+        <div class="page-hero">
+            <div>
+                <div class="eyebrow">Payment Ledger</div>
+                <h2 class="section-title">Payment History</h2>
+                <p class="section-subtitle">Review successful maintenance payments and transaction references.</p>
+            </div>
+        </div>
+
+        {% if payments %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>Amount</th>
+                        <th>Gateway</th>
+                        <th>Method</th>
+                        <th>Transaction ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.get_payment_type_display }}</td>
+                        <td>{{ payment.month }}</td>
+                        <td>{{ payment.year }}</td>
+                        <td>{{ payment.amount }}</td>
+                        <td>{{ payment.get_gateway_display }}</td>
+                        <td>{{ payment.payment_method|default:"-" }}</td>
+                        <td>{{ payment.transaction_id }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">No payment history available.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

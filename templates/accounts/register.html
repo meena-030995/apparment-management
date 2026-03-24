@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block extra_head %}
+<style>
+    .register-shell {
+        min-height: calc(100vh - 6rem);
+        display: grid;
+        grid-template-columns: minmax(280px, 1.05fr) minmax(360px, 1fr) minmax(280px, 1.05fr);
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 30px 70px rgba(33, 18, 58, 0.24);
+        background:
+            linear-gradient(135deg, rgba(56, 17, 98, 0.92), rgba(117, 63, 180, 0.84)),
+            radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 40%);
+    }
+
+    .register-visual {
+        position: relative;
+        min-height: 820px;
+        background:
+            linear-gradient(rgba(34, 16, 56, 0.38), rgba(34, 16, 56, 0.52)),
+            url("https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=1200&q=80") center/cover;
+    }
+
+    .register-visual::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.55) 1px, transparent 1px);
+        background-size: 18px 18px;
+        opacity: 0.25;
+    }
+
+    .register-panel {
+        position: relative;
+        padding: 3rem 2rem 2.5rem;
+        color: #fff;
+        background:
+            radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 30%),
+            linear-gradient(180deg, rgba(103, 51, 166, 0.92), rgba(67, 29, 120, 0.96));
+    }
+
+    .register-panel::before,
+    .register-panel::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(6px);
+        opacity: 0.5;
+    }
+
+    .register-panel::before {
+        width: 220px;
+        height: 220px;
+        right: -50px;
+        top: -40px;
+        background: rgba(255, 214, 252, 0.15);
+    }
+
+    .register-panel::after {
+        width: 180px;
+        height: 180px;
+        left: -45px;
+        bottom: 60px;
+        background: rgba(122, 208, 255, 0.12);
+    }
+
+    .register-card {
+        position: relative;
+        z-index: 1;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .register-title {
+        font-size: clamp(2.5rem, 4vw, 3.35rem);
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .register-subtitle {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.82);
+        margin-bottom: 1.75rem;
+        font-size: 1.05rem;
+    }
+
+    .register-form {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .register-row {
+        display: grid;
+        gap: 0.45rem;
+    }
+
+    .register-label {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.96);
+    }
+
+    .register-input,
+    .register-form input[type="file"] {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        background: rgba(255, 255, 255, 0.97);
+        color: #1b1230;
+        border-radius: 14px;
+        padding: 0.82rem 0.95rem;
+        outline: none;
+        box-shadow: none;
+    }
+
+    .password-toggle-wrap .register-input {
+        padding-right: 3.2rem;
+    }
+
+    .register-panel .password-toggle-btn {
+        color: #5f4a85;
+        right: 0.85rem;
+    }
+
+    .register-input:focus,
+    .register-form input[type="file"]:focus {
+        border-color: rgba(255, 255, 255, 0.7);
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+    }
+
+    .register-help,
+    .register-errors,
+    .register-form ul {
+        margin: 0;
+        padding-left: 1.1rem;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.95rem;
+    }
+
+    .register-errors {
+        color: #ffd6d6;
+    }
+
+    .register-submit {
+        margin-top: 0.6rem;
+        border: 0;
+        border-radius: 999px;
+        padding: 1rem 1.25rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2b1846;
+        background: linear-gradient(180deg, #ffffff, #f2eaff);
+        box-shadow: 0 16px 35px rgba(17, 8, 31, 0.2);
+    }
+
+    .register-submit:hover {
+        transform: translateY(-1px);
+        background: linear-gradient(180deg, #ffffff, #eadbff);
+    }
+
+    .register-login {
+        margin-top: 1.35rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 1rem;
+    }
+
+    .register-login a {
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    @media (max-width: 992px) {
+        .register-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .register-visual {
+            display: none;
+        }
+
+        .register-panel {
+            padding: 2rem 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="register-shell">
+    <div class="register-visual"></div>
+    <div class="register-panel">
+        <div class="register-card">
+            <h1 class="register-title">Register</h1>
+            <p class="register-subtitle">Create your account for AMS Apartment.</p>
+
+            <form method="POST" enctype="multipart/form-data" class="register-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="register-errors">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.username.id_for_label }}">Username:</label>
+                    {{ form.username }}
+                    {% if form.username.help_text %}<div class="register-help">{{ form.username.help_text|safe }}</div>{% endif %}
+                    {% if form.username.errors %}<div class="register-errors">{{ form.username.errors }}</div>{% endif %}
+                </div>
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.email.id_for_label }}">Email:</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<div class="register-errors">{{ form.email.errors }}</div>{% endif %}
+                </div>
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.phone.id_for_label }}">Phone:</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}<div class="register-errors">{{ form.phone.errors }}</div>{% endif %}
+                </div>
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.flat_number.id_for_label }}">Flat number:</label>
+                    {{ form.flat_number }}
+                    {% if form.flat_number.errors %}<div class="register-errors">{{ form.flat_number.errors }}</div>{% endif %}
+                </div>
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.block.id_for_label }}">Building name:</label>
+                    {{ form.block }}
+                    {% if form.block.errors %}<div class="register-errors">{{ form.block.errors }}</div>{% endif %}
+                </div>
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.id_proof.id_for_label }}">Id proof:</label>
+                    {{ form.id_proof }}
+                    {% if form.id_proof.errors %}<div class="register-errors">{{ form.id_proof.errors }}</div>{% endif %}
+                </div>
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.address_proof.id_for_label }}">Address proof:</label>
+                    {{ form.address_proof }}
+                    {% if form.address_proof.errors %}<div class="register-errors">{{ form.address_proof.errors }}</div>{% endif %}
+                </div>
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.role.id_for_label }}">Role:</label>
+                    {{ form.role }}
+                    {% if form.role.errors %}<div class="register-errors">{{ form.role.errors }}</div>{% endif %}
+                </div>
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.password1.id_for_label }}">Password:</label>
+                    <div class="password-toggle-wrap">
+                        {{ form.password1 }}
+                        <button class="password-toggle-btn" type="button" data-password-toggle data-target="{{ form.password1.id_for_label }}" aria-label="Show password">👁</button>
+                    </div>
+                    {% if form.password1.help_text %}<div class="register-help">{{ form.password1.help_text|safe }}</div>{% endif %}
+                    {% if form.password1.errors %}<div class="register-errors">{{ form.password1.errors }}</div>{% endif %}
+                </div>
+
+                <div class="register-row">
+                    <label class="register-label" for="{{ form.password2.id_for_label }}">Password confirmation:</label>
+                    <div class="password-toggle-wrap">
+                        {{ form.password2 }}
+                        <button class="password-toggle-btn" type="button" data-password-toggle data-target="{{ form.password2.id_for_label }}" aria-label="Show password">👁</button>
+                    </div>
+                    {% if form.password2.help_text %}<div class="register-help">{{ form.password2.help_text|safe }}</div>{% endif %}
+                    {% if form.password2.errors %}<div class="register-errors">{{ form.password2.errors }}</div>{% endif %}
+                </div>
+
+                <button class="register-submit" type="submit">Register</button>
+            </form>
+
+            <p class="register-login">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+        </div>
+    </div>
+    <div class="register-visual"></div>
+</section>
+{% endblock %}

@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Resident Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+    .resident-shell {
+        display: grid;
+        gap: 1.2rem;
+    }
+
+    .resident-hero {
+        position: relative;
+        overflow: hidden;
+        padding: clamp(1.5rem, 2vw, 2rem);
+        border-radius: 34px;
+        background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.26), transparent 24%),
+            radial-gradient(circle at left bottom, rgba(213, 123, 66, 0.3), transparent 30%),
+            linear-gradient(135deg, #16263d 0%, #17656d 58%, #d57b42 100%);
+        color: #fffdf8;
+        box-shadow: 0 28px 64px rgba(21, 33, 52, 0.24);
+    }
+
+    .resident-hero::after {
+        content: "";
+        position: absolute;
+        inset: auto -60px -70px auto;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .resident-hero p {
+        max-width: 42rem;
+        margin-bottom: 0;
+        color: rgba(255, 248, 240, 0.82);
+    }
+
+    .resident-mini-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 0.85rem;
+        margin-top: 1.2rem;
+    }
+
+    .resident-mini-stat {
+        position: relative;
+        z-index: 1;
+        padding: 1rem 1.05rem;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(8px);
+    }
+
+    .resident-mini-stat span {
+        display: block;
+    }
+
+    .resident-mini-stat .label {
+        font-size: 0.76rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 248, 240, 0.68);
+    }
+
+    .resident-mini-stat .value {
+        margin-top: 0.35rem;
+        font-size: 1.35rem;
+        font-weight: 800;
+    }
+
+    .resident-section-card {
+        padding: 1.35rem;
+        border-radius: 30px;
+        background: rgba(255, 251, 245, 0.72);
+        border: 1px solid rgba(34, 53, 75, 0.1);
+        box-shadow: 0 20px 48px rgba(21, 33, 52, 0.08);
+    }
+
+    .resident-action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .resident-action-card {
+        position: relative;
+        height: 100%;
+        padding: 1.35rem;
+        border-radius: 26px;
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 240, 232, 0.94));
+        border: 1px solid rgba(34, 53, 75, 0.08);
+        box-shadow: 0 18px 38px rgba(21, 33, 52, 0.08);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        overflow: hidden;
+    }
+
+    .resident-action-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto auto 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #155e63, #d57b42);
+    }
+
+    .resident-action-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 26px 50px rgba(21, 33, 52, 0.12);
+        border-color: rgba(213, 123, 66, 0.24);
+    }
+
+    .resident-action-icon {
+        width: 2.8rem;
+        height: 2.8rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(21, 94, 99, 0.14), rgba(213, 123, 66, 0.2));
+        color: #144b61;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+    }
+
+    .resident-action-card h5 {
+        margin-bottom: 0.45rem;
+        color: #101828;
+        font-weight: 800;
+    }
+
+    .resident-action-card p {
+        margin-bottom: 0.85rem;
+        color: #617189;
+    }
+
+    .resident-action-link {
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #155e63;
+    }
+
+    .resident-family-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.3fr);
+        gap: 1rem;
+    }
+
+    .resident-family-panel {
+        padding: 1.25rem;
+        border-radius: 26px;
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(34, 53, 75, 0.08);
+    }
+
+    .resident-family-note {
+        padding: 0.9rem 1rem;
+        border-radius: 18px;
+        background: rgba(21, 94, 99, 0.08);
+        color: #155e63;
+        font-size: 0.92rem;
+    }
+
+    .member-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.38rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(21, 94, 99, 0.1);
+        color: #155e63;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    @media (max-width: 992px) {
+        .resident-family-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="resident-shell">
+    <section class="resident-hero">
+        <div class="eyebrow text-light">Resident Portal</div>
+        <h2>Everything for your home, with a calmer daily flow.</h2>
+        <p>Track issues, stay in sync with society updates, and keep payment tasks moving from one thoughtfully organized dashboard.</p>
+
+        <div class="resident-mini-stats">
+            <div class="resident-mini-stat">
+                <span class="label">Support</span>
+                <span class="value">Tickets</span>
+            </div>
+            <div class="resident-mini-stat">
+                <span class="label">Finance</span>
+                <span class="value">Dues</span>
+            </div>
+            <div class="resident-mini-stat">
+                <span class="label">Community</span>
+                <span class="value">Notices</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="resident-section-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+            <div>
+                <div class="eyebrow mb-2">Quick Access</div>
+                <h3 class="section-title mb-1">Your everyday actions</h3>
+                <p class="section-subtitle">Shortcuts for the pages residents use most often.</p>
+            </div>
+        </div>
+
+        <div class="resident-action-grid">
+            <div>
+                <a class="text-decoration-none" href="{% url 'create_ticket' %}">
+                    <div class="resident-action-card">
+                        <div class="resident-action-icon">MT</div>
+                        <h5>Create Maintenance Ticket</h5>
+                        <p>Report plumbing, electrical, or security issues with a cleaner handoff to staff.</p>
+                        <span class="resident-action-link">Open Ticket Form</span>
+                    </div>
+                </a>
+            </div>
+            <div>
+                <a class="text-decoration-none" href="{% url 'my_tickets' %}">
+                    <div class="resident-action-card">
+                        <div class="resident-action-icon">TK</div>
+                        <h5>My Tickets</h5>
+                        <p>Follow complaint progress, review updates, and stay on top of issue resolution.</p>
+                        <span class="resident-action-link">View Ticket History</span>
+                    </div>
+                </a>
+            </div>
+            <div>
+                <a class="text-decoration-none" href="{% url 'my_dues' %}">
+                    <div class="resident-action-card">
+                        <div class="resident-action-icon">DU</div>
+                        <h5>Maintenance Dues</h5>
+                        <p>Check pending dues, review billing details, and handle your next payment quickly.</p>
+                        <span class="resident-action-link">Check Dues</span>
+                    </div>
+                </a>
+            </div>
+            <div>
+                <a class="text-decoration-none" href="{% url 'payment_history' %}">
+                    <div class="resident-action-card">
+                        <div class="resident-action-icon">PH</div>
+                        <h5>Payment History</h5>
+                        <p>Review previous successful payments and keep a clear record of your dues activity.</p>
+                        <span class="resident-action-link">See Payment Timeline</span>
+                    </div>
+                </a>
+            </div>
+            <div>
+                <a class="text-decoration-none" href="{% url 'notice_list' %}">
+                    <div class="resident-action-card">
+                        <div class="resident-action-icon">NB</div>
+                        <h5>Notice Board</h5>
+                        <p>Stay current with maintenance windows, society news, and community announcements.</p>
+                        <span class="resident-action-link">Read Notices</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="resident-section-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+            <div>
+                <div class="eyebrow mb-2">Family Details</div>
+                <h3 class="section-title mb-1">Your flat household record</h3>
+                <p class="section-subtitle">Add the names and details for people living in your flat. These details are visible only to you, staff, and admin.</p>
+            </div>
+            <span class="member-chip">{{ request.user.get_household_type_display }}</span>
+        </div>
+
+        <div class="resident-family-layout">
+            <div class="resident-family-panel">
+                <div class="resident-family-note mb-3">
+                    Choose <strong>Bachelor</strong> and add your own member record, or choose <strong>Family</strong> and add each family member one by one.
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="family_action" value="add">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label" for="{{ family_form.household_type.id_for_label }}">Household Type</label>
+                            {{ family_form.household_type }}
+                            {% if family_form.household_type.errors %}<div class="text-danger small mt-1">{{ family_form.household_type.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ family_form.name.id_for_label }}">Member Name</label>
+                            {{ family_form.name }}
+                            {% if family_form.name.errors %}<div class="text-danger small mt-1">{{ family_form.name.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ family_form.gender.id_for_label }}">Gender</label>
+                            {{ family_form.gender }}
+                            {% if family_form.gender.errors %}<div class="text-danger small mt-1">{{ family_form.gender.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ family_form.relationship.id_for_label }}">Relationship</label>
+                            {{ family_form.relationship }}
+                            {% if family_form.relationship.errors %}<div class="text-danger small mt-1">{{ family_form.relationship.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="{{ family_form.date_of_birth.id_for_label }}">Date of Birth</label>
+                            {{ family_form.date_of_birth }}
+                            {% if family_form.date_of_birth.errors %}<div class="text-danger small mt-1">{{ family_form.date_of_birth.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                    {% if family_form.non_field_errors %}<div class="text-danger small mt-3">{{ family_form.non_field_errors }}</div>{% endif %}
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Save Family Details</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="resident-family-panel">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h4 class="mb-1">Saved Member Details</h4>
+                        <p class="section-subtitle">Only your own household record is shown here.</p>
+                    </div>
+                </div>
+
+                {% if family_members %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Gender</th>
+                                    <th>Relationship</th>
+                                    <th>Date of Birth</th>
+                                    <th>Age</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in family_members %}
+                                    <tr>
+                                        <td>{{ member.name }}</td>
+                                        <td>{{ member.get_gender_display }}</td>
+                                        <td>{{ member.relationship }}</td>
+                                        <td>{{ member.date_of_birth|date:"d M Y" }}</td>
+                                        <td>{{ member.age }}</td>
+                                        <td class="text-end">
+                                            <form method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="family_action" value="delete">
+                                                <input type="hidden" name="member_id" value="{{ member.id }}">
+                                                <button type="submit" class="btn btn-outline-secondary btn-sm">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="content-note">No household members have been added yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}All Tickets{% endblock %}
+
+{% block content %}
+<div class="card page-card">
+    <div class="card-body p-4">
+        <div class="page-hero">
+            <div>
+                <div class="eyebrow">Support Inbox</div>
+                <h3 class="section-title">All Tickets</h3>
+                <p class="section-subtitle">Review complaints from residents and update their current status.</p>
+            </div>
+        </div>
+
+        <form method="get" class="row g-3 mb-4 filter-panel">
+            <div class="col-md-4">
+                <label for="ticketQuery" class="form-label">Search</label>
+                <input
+                    id="ticketQuery"
+                    type="text"
+                    name="q"
+                    class="form-control"
+                    value="{{ filters.q }}"
+                    placeholder="Title, resident, or description"
+                >
+            </div>
+            <div class="col-md-3">
+                <label for="ticketStatus" class="form-label">Status</label>
+                <select id="ticketStatus" name="status" class="form-select">
+                    <option value="">All statuses</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="ticketCategory" class="form-label">Category</label>
+                <select id="ticketCategory" name="category" class="form-select">
+                    <option value="">All categories</option>
+                    {% for value, label in category_choices %}
+                    <option value="{{ value }}" {% if filters.category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="ticketResident" class="form-label">Resident</label>
+                <input
+                    id="ticketResident"
+                    type="text"
+                    name="resident"
+                    class="form-control"
+                    value="{{ filters.resident }}"
+                    placeholder="Username"
+                >
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{% url 'all_tickets' %}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+
+        {% if tickets %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Resident</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td>{{ ticket.resident }}</td>
+                        <td>{{ ticket.title }}</td>
+                        <td>{{ ticket.get_category_display }}</td>
+                        <td><span class="badge text-bg-secondary">{{ ticket.get_status_display }}</span></td>
+                        <td>
+                            <a class="btn btn-warning btn-sm" href="{% url 'update_ticket' ticket.id %}">Update</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">No tickets available.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

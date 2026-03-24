@@ -1,0 +1,412 @@
+{% extends "base.html" %}
+
+{% block title %}AI Apartment Assistant{% endblock %}
+
+{% block extra_head %}
+<style>
+    .assistant-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+        gap: 1.1rem;
+    }
+
+    .assistant-workspace,
+    .assistant-panel,
+    .assistant-composer {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.86);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .assistant-workspace {
+        border-radius: 24px;
+        min-height: 700px;
+        overflow: hidden;
+    }
+
+    .workspace-header {
+        padding: 1rem 1.1rem;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        background: rgba(250, 252, 255, 0.92);
+    }
+
+    .workspace-dot {
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+        background: #9aa8be;
+        box-shadow: 0 0 0 0.1rem rgba(154, 168, 190, 0.2);
+    }
+
+    .workspace-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #1a2a44;
+    }
+
+    .workspace-body {
+        padding: 1.15rem;
+        display: grid;
+        gap: 0.9rem;
+        background:
+            radial-gradient(circle at 88% 12%, rgba(66, 128, 255, 0.12), transparent 24%),
+            linear-gradient(180deg, rgba(255,255,255,0.95), rgba(246,249,253,0.9));
+        height: calc(100% - 58px);
+    }
+
+    .workspace-card {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.96);
+        padding: 1rem 1.05rem;
+    }
+
+    .workspace-card h3 {
+        margin: 0 0 0.35rem;
+        color: #132543;
+        font-weight: 700;
+        font-size: 1.02rem;
+    }
+
+    .workspace-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.65;
+    }
+
+    .assistant-panel {
+        border-radius: 24px;
+        display: grid;
+        grid-template-rows: auto minmax(230px, 1fr) auto;
+        min-height: 700px;
+        overflow: hidden;
+    }
+
+    .assistant-hero {
+        padding: 1.35rem 1.35rem 1rem;
+        border-bottom: 1px solid var(--line);
+        background:
+            radial-gradient(circle at 88% 0%, rgba(66, 128, 255, 0.15), transparent 34%),
+            linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,252,255,0.95));
+    }
+
+    .assistant-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 0.6rem;
+        color: #52627b;
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+
+    .assistant-brand-glyph {
+        width: 1.15rem;
+        height: 1.15rem;
+        border-radius: 0.35rem;
+        background: linear-gradient(135deg, #2455bd, #64b5f6);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.38);
+    }
+
+    .assistant-hero h1 {
+        margin: 0 0 0.35rem;
+        font-size: clamp(1.8rem, 4.4vw, 2.2rem);
+        color: #2b69df;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+    }
+
+    .assistant-hero p {
+        margin: 0;
+        color: #28344b;
+        font-size: 1.05rem;
+    }
+
+    .assistant-status {
+        margin-top: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.45rem 0.8rem;
+        background: rgba(43, 105, 223, 0.08);
+        color: #27498f;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .assistant-chat-area {
+        min-height: 0;
+        overflow-y: auto;
+        padding: 1rem 1.15rem;
+        background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(247,250,255,0.9));
+    }
+
+    .assistant-starter-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin-bottom: 0.9rem;
+    }
+
+    .starter-chip {
+        border: 1px solid rgba(43, 105, 223, 0.35);
+        background: #fff;
+        color: #2557be;
+        border-radius: 999px;
+        padding: 0.35rem 0.72rem;
+        font-size: 0.87rem;
+        font-weight: 700;
+        transition: all 0.16s ease;
+    }
+
+    .starter-chip:hover {
+        transform: translateY(-1px);
+        border-color: #2b69df;
+        box-shadow: 0 10px 22px rgba(43, 105, 223, 0.13);
+    }
+
+    .assistant-messages {
+        display: grid;
+        gap: 0.7rem;
+    }
+
+    .message-row {
+        display: flex;
+    }
+
+    .message-row.assistant {
+        justify-content: flex-start;
+    }
+
+    .message-row.user {
+        justify-content: flex-end;
+    }
+
+    .message-bubble {
+        max-width: 88%;
+        border-radius: 16px;
+        padding: 0.8rem 0.9rem;
+        white-space: pre-wrap;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    .message-row.assistant .message-bubble {
+        background: #fff;
+        border: 1px solid var(--line);
+        color: #263650;
+    }
+
+    .message-row.user .message-bubble {
+        background: linear-gradient(135deg, #2d66cf, #1e4fab);
+        color: #fff;
+        border: 1px solid transparent;
+    }
+
+    .assistant-composer {
+        margin: 0.8rem 1rem 1rem;
+        border-radius: 18px;
+        padding: 0.9rem;
+    }
+
+    .assistant-composer-form {
+        display: flex;
+        gap: 0.65rem;
+        align-items: flex-end;
+    }
+
+    .assistant-composer-form textarea {
+        min-height: 74px;
+        resize: vertical;
+    }
+
+    @media (max-width: 992px) {
+        .assistant-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .assistant-workspace {
+            min-height: 320px;
+        }
+
+        .assistant-panel {
+            min-height: 620px;
+        }
+
+        .assistant-composer-form {
+            flex-direction: column;
+        }
+
+        .assistant-composer-form .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="assistant-shell">
+    <section class="assistant-workspace">
+        <div class="workspace-header">
+            <span class="workspace-dot"></span>
+            <span class="workspace-dot"></span>
+            <span class="workspace-dot"></span>
+            <span class="workspace-title">Ask AMS Workspace</span>
+        </div>
+        <div class="workspace-body">
+            <div class="workspace-card">
+                <div class="eyebrow">Resident Assistant</div>
+                <h3>Chat Guidance Built Into AMS</h3>
+                <p>Ask about dues, tickets, notices, visitors, and everyday portal steps. The assistant provides guidance and summaries without directly editing records.</p>
+            </div>
+            <div class="workspace-card">
+                <h3>Helpful Tips</h3>
+                <p>Use short prompts for faster replies. Include ticket IDs, months, or payment context when you need precise support.</p>
+            </div>
+            <div class="workspace-card">
+                <h3>Starter Prompts</h3>
+                <p>You can use the quick chips inside the chat panel to instantly ask common questions.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="assistant-panel">
+        <div class="assistant-hero">
+            <div class="assistant-brand">
+                <span class="assistant-brand-glyph"></span>
+                <span>Ask AMS</span>
+            </div>
+            <h1>Hello, {{ request.user.first_name|default:request.user.username }}</h1>
+            <p>How can I help you today?</p>
+            <div class="assistant-status">
+                {% if chatbot_enabled %}
+                    AI connection configured
+                {% else %}
+                    Running in local assistant mode
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="assistant-chat-area">
+            <div class="assistant-starter-list">
+                {% for prompt in starter_prompts %}
+                    <button class="starter-chip" type="button" data-starter-prompt="{{ prompt }}">{{ prompt }}</button>
+                {% endfor %}
+            </div>
+            <div class="assistant-messages" id="assistant-messages">
+                <div class="message-row assistant">
+                    <div class="message-bubble">
+I am your Ask AMS assistant. I can help with maintenance tickets, due payments, notices, visitor logs, and portal workflows.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="assistant-composer">
+            <form class="assistant-composer-form" id="assistant-form">
+                {% csrf_token %}
+                <div class="flex-grow-1 w-100">
+                    <label class="form-label" for="assistant-message">Your message</label>
+                    <textarea class="form-control" id="assistant-message" placeholder="Ask something like: How do I pay maintenance dues for my flat?"></textarea>
+                </div>
+                <button class="btn btn-primary px-4" id="assistant-submit" type="submit">Send</button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const assistantMessages = document.getElementById("assistant-messages");
+    const assistantForm = document.getElementById("assistant-form");
+    const assistantInput = document.getElementById("assistant-message");
+    const assistantSubmit = document.getElementById("assistant-submit");
+    const history = [];
+
+    function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split(";") : [];
+        for (const cookie of cookies) {
+            const trimmed = cookie.trim();
+            if (trimmed.startsWith(name + "=")) {
+                return decodeURIComponent(trimmed.slice(name.length + 1));
+            }
+        }
+        return "";
+    }
+
+    function appendMessage(role, content) {
+        const row = document.createElement("div");
+        row.className = "message-row " + role;
+
+        const bubble = document.createElement("div");
+        bubble.className = "message-bubble";
+        bubble.textContent = content;
+
+        row.appendChild(bubble);
+        assistantMessages.appendChild(row);
+        assistantMessages.scrollTop = assistantMessages.scrollHeight;
+    }
+
+    async function sendMessage(message) {
+        appendMessage("user", message);
+        history.push({ role: "user", content: message });
+
+        assistantSubmit.disabled = true;
+        assistantSubmit.textContent = "Thinking...";
+
+        try {
+            const response = await fetch("{% url 'assistant_chat_api' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({
+                    message,
+                    history,
+                }),
+            });
+
+            const payload = await response.json();
+            const reply = payload.reply || payload.error || "The assistant could not answer that just now.";
+
+            appendMessage("assistant", reply);
+            history.push({ role: "assistant", content: reply });
+        } catch (error) {
+            appendMessage("assistant", "The assistant could not connect right now. Please try again.");
+            history.push({
+                role: "assistant",
+                content: "The assistant could not connect right now. Please try again.",
+            });
+        } finally {
+            assistantSubmit.disabled = false;
+            assistantSubmit.textContent = "Send";
+            assistantInput.focus();
+        }
+    }
+
+    assistantForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const message = assistantInput.value.trim();
+        if (!message) {
+            assistantInput.focus();
+            return;
+        }
+
+        assistantInput.value = "";
+        await sendMessage(message);
+    });
+
+    document.querySelectorAll("[data-starter-prompt]").forEach((button) => {
+        button.addEventListener("click", async () => {
+            const prompt = button.dataset.starterPrompt;
+            assistantInput.value = prompt;
+            assistantInput.focus();
+        });
+    });
+</script>
+{% endblock %}

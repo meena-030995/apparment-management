@@ -1,0 +1,46 @@
+<aside class="app-sidebar">
+    <a class="app-sidebar__brand" href="{% url 'dashboard' %}">
+        <span class="app-sidebar__label">Living Console</span>
+        <span class="app-sidebar__brand-title">AMS Apartment</span>
+        <span class="app-sidebar__brand-subtitle">Resident Platform</span>
+    </a>
+
+    <div class="app-sidebar__section">
+        <span class="app-sidebar__label">Navigation</span>
+        <nav class="app-sidebar__nav" aria-label="Sidebar">
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'dashboard' %}is-active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a>
+
+            {% if request.user.role == "resident" %}
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'create_ticket' %}is-active{% endif %}" href="{% url 'create_ticket' %}">Create Ticket</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'my_tickets' %}is-active{% endif %}" href="{% url 'my_tickets' %}">My Tickets</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'my_dues' %}is-active{% endif %}" href="{% url 'my_dues' %}">Maintenance Dues</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'payment_history' %}is-active{% endif %}" href="{% url 'payment_history' %}">Payment History</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'notice_list' %}is-active{% endif %}" href="{% url 'notice_list' %}">Notices</a>
+            {% elif request.user.role == "security" %}
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'add_visitor' %}is-active{% endif %}" href="{% url 'add_visitor' %}">Add Visitor</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'visitor_list' %}is-active{% endif %}" href="{% url 'visitor_list' %}">Visitor Logs</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'notice_list' %}is-active{% endif %}" href="{% url 'notice_list' %}">Notices</a>
+            {% elif request.user.role == "staff" %}
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'all_tickets' %}is-active{% endif %}" href="{% url 'all_tickets' %}">Tickets</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'visitor_list' %}is-active{% endif %}" href="{% url 'visitor_list' %}">Visitor Logs</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'create_notice' %}is-active{% endif %}" href="{% url 'create_notice' %}">Create Notice</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'notice_list' %}is-active{% endif %}" href="{% url 'notice_list' %}">Notices</a>
+            {% elif request.user.role == "admin" %}
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'all_tickets' %}is-active{% endif %}" href="{% url 'all_tickets' %}">Manage Tickets</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'notice_list' %}is-active{% endif %}" href="{% url 'notice_list' %}">Manage Notices</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'visitor_list' %}is-active{% endif %}" href="{% url 'visitor_list' %}">Visitors</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'payment_records' %}is-active{% endif %}" href="{% url 'payment_records' %}">Payments</a>
+            <a class="nav-link app-sidebar__link {% if request.resolver_match.url_name == 'activity_logs' %}is-active{% endif %}" href="{% url 'activity_logs' %}">Activity Logs</a>
+            {% endif %}
+        </nav>
+    </div>
+
+    <div class="app-sidebar__footer">
+        <div class="app-sidebar__user-meta">
+            <span class="app-sidebar__label">Signed in as</span>
+            <strong>{{ request.user.username }}</strong>
+            <span class="app-sidebar__role">{{ request.user.role }}</span>
+        </div>
+        <a class="btn btn-danger btn-sm px-4" href="{% url 'logout' %}">Logout</a>
+    </div>
+</aside>

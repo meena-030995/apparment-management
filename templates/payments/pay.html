@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Pay Maintenance{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+            <div class="card page-card">
+                <div class="card-body p-4 p-md-5 text-center">
+                    <h3 class="section-title">Complete Payment</h3>
+                    <p class="section-subtitle">Proceed with {{ checkout.provider_label }} to complete your apartment payment.</p>
+
+                    <div class="border rounded p-4 bg-light mb-4">
+                        <div class="text-muted">{{ payment.get_payment_type_display }}</div>
+                        <div class="text-muted">Amount</div>
+                        <div class="display-6 fw-semibold">INR {{ payment.amount }}</div>
+                    </div>
+
+                {% if checkout.mode == "manual_fallback" %}
+                <form method="POST" action="{% url 'pay_now' payment.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg">Complete Test Payment</button>
+                </form>
+                <p class="text-muted mt-3 mb-0 small">
+                    This is a development-only fallback because online gateway keys are missing.
+                </p>
+                {% else %}
+                <button id="pay-btn" type="button" class="btn btn-success btn-lg">Pay Now</button>
+
+                <form id="payment-success-form" method="POST" action="/payments/success/">
+                    {% csrf_token %}
+                    <input type="hidden" name="payment_id" value="{{ payment.id }}">
+                    <input type="hidden" name="razorpay_payment_id" id="razorpay-payment-id">
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if checkout.mode != "manual_fallback" %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+var options = {
+    "key": "{{ checkout.public_key }}",
+    "amount": "{{ checkout.amount_paise }}",
+    "currency": "INR",
+    "order_id": "{{ checkout.order_id }}",
+    "name": "{{ checkout.display_name }}",
+    "handler": function (response) {
+        document.getElementById("razorpay-payment-id").value = response.razorpay_payment_id;
+        document.getElementById("payment-success-form").submit();
+    }
+};
+
+var rzp = new Razorpay(options);
+
+document.getElementById("pay-btn").onclick = function(e) {
+    rzp.open();
+    e.preventDefault();
+};
+</script>
+{% endif %}
+{% endblock %}

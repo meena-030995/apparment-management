@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Records{% endblock %}
+
+{% block content %}
+<div class="card page-card">
+    <div class="card-body p-4">
+        <div class="page-hero">
+            <div>
+                <div class="eyebrow">Accounts Overview</div>
+                <h2 class="section-title">Payment Records</h2>
+                <p class="section-subtitle">Track dues assigned across residents and monitor payment completion.</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Pending Dues</span>
+                <div class="stat-value">{{ pending_count }}</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Paid Records</span>
+                <div class="stat-value">{{ paid_count }}</div>
+            </div>
+        </div>
+
+        <div class="filter-panel">
+            <div class="page-hero mb-3">
+                <div>
+                    <div class="eyebrow">{% if edit_payment %}Update Record{% else %}Create Record{% endif %}</div>
+                    <h3 class="section-title">{% if edit_payment %}Edit Payment Record{% else %}Add Payment Record{% endif %}</h3>
+                    <p class="section-subtitle">
+                        {% if edit_payment %}
+                        Adjust resident, amount, status, and transaction details for this payment record.
+                        {% else %}
+                        Assign a new due or record a paid entry for a resident.
+                        {% endif %}
+                    </p>
+                </div>
+                {% if edit_payment %}
+                <a href="{% url 'payment_records' %}" class="btn btn-outline-secondary">Cancel Edit</a>
+                {% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{% if edit_payment %}update{% else %}create{% endif %}">
+                {% if edit_payment %}
+                <input type="hidden" name="payment_id" value="{{ edit_payment.id }}">
+                {% endif %}
+                <div class="col-md-4">
+                    <label class="form-label" for="{{ form.resident.id_for_label }}">Resident</label>
+                    {{ form.resident }}
+                    {% if form.resident.errors %}<div class="text-danger small mt-1">{{ form.resident.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="{{ form.month.id_for_label }}">Month</label>
+                    {{ form.month }}
+                    {% if form.month.errors %}<div class="text-danger small mt-1">{{ form.month.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="{{ form.year.id_for_label }}">Year</label>
+                    {{ form.year }}
+                    {% if form.year.errors %}<div class="text-danger small mt-1">{{ form.year.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="{{ form.due_date.id_for_label }}">Due Date</label>
+                    {{ form.due_date }}
+                    {% if form.due_date.errors %}<div class="text-danger small mt-1">{{ form.due_date.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="{{ form.payment_type.id_for_label }}">Type</label>
+                    {{ form.payment_type }}
+                    {% if form.payment_type.errors %}<div class="text-danger small mt-1">{{ form.payment_type.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="{{ form.amount.id_for_label }}">Amount</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}<div class="text-danger small mt-1">{{ form.amount.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="{{ form.status.id_for_label }}">Status</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<div class="text-danger small mt-1">{{ form.status.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="{{ form.gateway.id_for_label }}">Gateway</label>
+                    {{ form.gateway }}
+                    {% if form.gateway.errors %}<div class="text-danger small mt-1">{{ form.gateway.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="{{ form.payment_method.id_for_label }}">Method</label>
+                    {{ form.payment_method }}
+                    {% if form.payment_method.errors %}<div class="text-danger small mt-1">{{ form.payment_method.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="{{ form.transaction_id.id_for_label }}">Transaction ID</label>
+                    {{ form.transaction_id }}
+                    {% if form.transaction_id.errors %}<div class="text-danger small mt-1">{{ form.transaction_id.errors }}</div>{% endif %}
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        {% if edit_payment %}Update Payment Record{% else %}Create Payment Record{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <form method="get" class="row g-3 mb-4 filter-panel">
+            <div class="col-md-4">
+                <label for="paymentQuery" class="form-label">Search</label>
+                <input
+                    id="paymentQuery"
+                    type="text"
+                    name="q"
+                    class="form-control"
+                    value="{{ filters.q }}"
+                    placeholder="Resident, month, or transaction ID"
+                >
+            </div>
+            <div class="col-md-2">
+                <label for="paymentStatus" class="form-label">Status</label>
+                <select id="paymentStatus" name="status" class="form-select">
+                    <option value="">All statuses</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="paymentMonth" class="form-label">Month</label>
+                <input
+                    id="paymentMonth"
+                    type="text"
+                    name="month"
+                    class="form-control"
+                    value="{{ filters.month }}"
+                    placeholder="March"
+                >
+            </div>
+            <div class="col-md-2">
+                <label for="paymentYear" class="form-label">Year</label>
+                <input
+                    id="paymentYear"
+                    type="number"
+                    name="year"
+                    class="form-control"
+                    value="{{ filters.year }}"
+                    placeholder="2026"
+                >
+            </div>
+            <div class="col-md-1 d-grid">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary">Go</button>
+            </div>
+            <div class="col-12">
+                <a href="{% url 'payment_records' %}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+
+        {% if payments %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Resident</th>
+                        <th>Type</th>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>Due Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Gateway</th>
+                        <th>Method</th>
+                        <th>Transaction ID</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.resident.username }}</td>
+                        <td>{{ payment.get_payment_type_display }}</td>
+                        <td>{{ payment.month|default:"-" }}</td>
+                        <td>{{ payment.year|default:"-" }}</td>
+                        <td>{{ payment.due_date|default:"-" }}</td>
+                        <td>{{ payment.amount }}</td>
+                        <td><span class="badge text-bg-secondary">{{ payment.get_status_display }}</span></td>
+                        <td>{{ payment.get_gateway_display }}</td>
+                        <td>{{ payment.payment_method|default:"-" }}</td>
+                        <td>{{ payment.transaction_id|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'payment_records' %}?edit={{ payment.id }}" class="btn btn-outline-secondary btn-sm">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mt-4 mb-0">No payment records available yet.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

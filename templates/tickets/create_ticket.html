@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Create Ticket{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card page-card">
+            <div class="card-body p-4 p-md-5">
+                <div class="page-hero">
+                    <div>
+                        <div class="eyebrow">Support Request</div>
+                        <h3 class="section-title">Create Maintenance Ticket</h3>
+                        <p class="section-subtitle">Describe the issue clearly so the staff team can respond faster.</p>
+                    </div>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" class="filter-panel">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-primary">Submit Ticket</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
